@@ -33,6 +33,9 @@ if __name__ == '__main__':
     c = c[0]
     headers = {
         'User-Agent': str(ua.random),
+        'Host': 'q.10jqka.com.cn',
+        'Referer': 'http://q.10jqka.com.cn/',
+        'X-Requested-With': 'XMLHttpRequest',
     }
     # 代理池，请勿删本程序包内未知文件
     proxies = {
@@ -41,10 +44,15 @@ if __name__ == '__main__':
     try:
         main_list1 = []
         for a in range(page):
-            url = 'http://q.10jqka.com.cn/index/index/board/all/field/zdf/order/desc/page/' + str(a+1) + '/ajax/1/'
-            response = requests.get(url, headers=headers, proxies=proxies).text
-            time.sleep(0.5)
-            print("正在爬取第" + str(a+1) + "页")
+            url = 'http://q.10jqka.com.cn/index/index/board/all/field/zdf/order/desc/page/' + str(a + 1) + '/ajax/1/'
+            response = requests.get(url, headers=headers, proxies=proxies)
+            if response.status_code != 200:
+                print("获取第" + str(page) + "失败，已重试")
+                page = page-1
+                continue
+            response = response.text
+            time.sleep(1)
+            print("正在爬取第" + str(a + 1) + "页")
             soup = BeautifulSoup(response, 'lxml')
             clean = soup.find('table').text     # 找到源代码里的table标签里的文字内容
             clean = clean.split('\n')           # 使用split方法分割字符串
@@ -61,7 +69,7 @@ if __name__ == '__main__':
         print('请求超时，请重新运行本程序！')
     except WindowsError:
         print('未知错误，请重新运行！')
-    except:
+    except BaseException:
         print('未知错误，请重新运行！')
     finally:
         print("结束，请查看market.xlsx文件获取数据！谢谢使用！")
